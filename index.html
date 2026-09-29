@@ -4,6 +4,7 @@
 
 <head>
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -13,7 +14,7 @@
 
   <link
     rel="stylesheet"
-    href="style.css"
+    href="style.css?v=3"
   >
 </head>
 
@@ -21,7 +22,7 @@
 
   <div id="app">
 
-    <!-- Login -->
+    <!-- LOGIN SCREEN -->
 
     <section
       id="login-screen"
@@ -40,7 +41,6 @@
           Private chat for our family
         </p>
 
-
         <input
           id="email"
           name="email"
@@ -48,7 +48,6 @@
           placeholder="Email address"
           autocomplete="email"
         >
-
 
         <input
           id="password"
@@ -58,14 +57,12 @@
           autocomplete="current-password"
         >
 
-
         <button
           id="login-button"
           type="button"
         >
           Log in
         </button>
-
 
         <button
           id="signup-button"
@@ -74,7 +71,6 @@
         >
           Create account
         </button>
-
 
         <p
           id="auth-message"
@@ -86,7 +82,7 @@
     </section>
 
 
-    <!-- Family setup -->
+    <!-- FAMILY SETUP -->
 
     <section
       id="setup-screen"
@@ -105,7 +101,6 @@
           Tell your family who you are.
         </p>
 
-
         <input
           id="display-name"
           name="display-name"
@@ -113,7 +108,6 @@
           placeholder="Your name"
           autocomplete="name"
         >
-
 
         <input
           id="invite-code"
@@ -123,14 +117,12 @@
           autocomplete="off"
         >
 
-
         <button
           id="join-button"
           type="button"
         >
           Join Family
         </button>
-
 
         <p
           id="setup-message"
@@ -142,7 +134,7 @@
     </section>
 
 
-    <!-- Chat -->
+    <!-- CHAT SCREEN -->
 
     <section
       id="chat-screen"
@@ -162,7 +154,6 @@
           ></span>
 
         </div>
-
 
         <button
           id="logout-button"
@@ -192,9 +183,7 @@
           autocomplete="off"
         >
 
-        <button
-          type="submit"
-        >
+        <button type="submit">
           ➤
         </button>
 
@@ -205,18 +194,72 @@
   </div>
 
 
-  <!-- Supabase -->
+  <!-- SUPABASE -->
 
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
 
-  <!-- Our application -->
+  <!-- OUR APP -->
 
-  <script src="app.js"></script>
+  <script src="app.js?v=3"></script>
+
+
+  <!-- If app.js fails to load, show a useful message -->
+
+  <script>
+
+    window.addEventListener("load", function () {
+
+      setTimeout(function () {
+
+        if (
+          typeof window.supabase === "undefined"
+        ) {
+
+          const message =
+            document.getElementById("auth-message");
+
+          if (message) {
+            message.textContent =
+              "The login system did not load. Please refresh the page.";
+          }
+
+          console.error(
+            "Supabase JavaScript library did not load."
+          );
+
+          return;
+        }
+
+        console.log(
+          "Family Chat loaded successfully."
+        );
+
+      }, 500);
+
+    });
+
+  </script>
 
 </body>
 
 </html>
 ```
+
+### Now only do this
+
+1. GitHub → **family-chat** → **index.html**.
+2. Click **✏️ Edit**.
+3. **Delete everything** in the file.
+4. Paste the complete code above.
+5. Click **Commit changes**.
+6. Wait **2–3 minutes**.
+7. Open your Family Chat page.
+8. Press **Ctrl + Shift + R**.
+9. Try logging in.
+
+**Important:** the `undefined` result from `typeof supabaseClient` was not enough to prove that `app.js` wasn't running, because the variable was declared with `let`. So we're correcting that diagnostic rather than chasing the wrong problem.
+
+If login still stays on **“Logging in…”**, don't replace anything else. Tell me exactly what the page says after the click.

@@ -1,14 +1,10 @@
 ```javascript
 const SUPABASE_URL = "https://zbadfkbthhmxyheqokqs.supabase.co";
+const SUPABASE_KEY = "sb_publishable_WN1Sd-gEqAxAUX8GbsUTQQ__xvDjILL";
 
-const SUPABASE_KEY =
-  "sb_publishable_WN1Sd-gEqAxAUX8GbsUTQQ__xvDjILL";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
+let supabaseClient = null;
+let currentUser = null;
+let realtimeChannel = null;
 
 // -----------------------------
 // Get page elements
@@ -26,40 +22,17 @@ const signupButton = document.getElementById("signup-button");
 
 const authMessage = document.getElementById("auth-message");
 
-const displayNameInput =
-  document.getElementById("display-name");
+const displayNameInput = document.getElementById("display-name");
+const inviteCodeInput = document.getElementById("invite-code");
+const joinButton = document.getElementById("join-button");
+const setupMessage = document.getElementById("setup-message");
 
-const inviteCodeInput =
-  document.getElementById("invite-code");
+const messagesContainer = document.getElementById("messages");
+const messageForm = document.getElementById("message-form");
+const messageInput = document.getElementById("message-input");
 
-const joinButton =
-  document.getElementById("join-button");
-
-const setupMessage =
-  document.getElementById("setup-message");
-
-const messagesContainer =
-  document.getElementById("messages");
-
-const messageForm =
-  document.getElementById("message-form");
-
-const messageInput =
-  document.getElementById("message-input");
-
-const logoutButton =
-  document.getElementById("logout-button");
-
-const currentUserElement =
-  document.getElementById("current-user");
-
-
-// -----------------------------
-// App variables
-// -----------------------------
-
-let currentUser = null;
-let realtimeChannel = null;
+const logoutButton = document.getElementById("logout-button");
+const currentUserElement = document.getElementById("current-user");
 
 
 // -----------------------------
@@ -76,12 +49,51 @@ function showScreen(screen) {
 
 
 // -----------------------------
-// Show login
+// Startup
 // -----------------------------
 
-function showLogin(message = "") {
-  showScreen(loginScreen);
-  authMessage.textContent = message;
+async function startApp() {
+
+  try {
+
+    if (!window.supabase) {
+      authMessage.textContent =
+        "The chat system did not load. Please refresh the page.";
+      return;
+    }
+
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const result = await supabaseClient.auth.getSession();
+
+    if (result.error) {
+      console.error(result.error);
+
+      authMessage.textContent =
+        "Could not connect to the login system.";
+
+      return;
+    }
+
+    if (!result.data.session) {
+      showScreen(loginScreen);
+      return;
+    }
+
+    currentUser = result.data.session.user;
+
+    await checkFamilyMembership();
+
+  } catch (error) {
+
+    console.error("Startup error:", error);
+
+    authMessage.textContent =
+      "Something went wrong. Please refresh the page.";
+  }
 }
 
 
@@ -91,13 +103,18 @@ function showLogin(message = "") {
 
 loginButton.addEventListener("click", async function () {
 
+  if (!supabaseClient) {
+    authMessage.textContent =
+      "Please wait a moment and try again.";
+    return;
+  }
+
   const email = emailInput.value.trim();
   const password = passwordInput.value;
 
   if (!email || !password) {
     authMessage.textContent =
       "Please enter your email and password.";
-
     return;
   }
 
@@ -114,16 +131,12 @@ loginButton.addEventListener("click", async function () {
 
     if (result.error) {
 
-      console.error(
-        "Login error:",
-        result.error
-      );
+      console.error("Login error:", result.error);
 
       authMessage.textContent =
         result.error.message;
 
       loginButton.disabled = false;
-
       return;
     }
 
@@ -135,10 +148,7 @@ loginButton.addEventListener("click", async function () {
 
   } catch (error) {
 
-    console.error(
-      "Unexpected login error:",
-      error
-    );
+    console.error("Login exception:", error);
 
     authMessage.textContent =
       "Login failed. Please try again.";
@@ -153,92 +163,76 @@ loginButton.addEventListener("click", async function () {
 // Create account
 // -----------------------------
 
-signupButton.addEventListener(
-  "click",
-  async function () {
+signupButton.addEventListener("click", async function () {
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
+  if (!supabaseClient) {
+    authMessage.textContent =
+      "Please wait a moment and try again.";
+    return;
+  }
 
-    if (!email || !password) {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    authMessage.textContent =
+      "Enter an email and password first.";
+    return;
+  }
+
+  if (password.length < 6) {
+    authMessage.textContent =
+      "Your password must be at least 6 characters.";
+    return;
+  }
+
+  authMessage.textContent = "Creating account...";
+  signupButton.disabled = true;
+
+  try {
+
+    const result =
+      await supabaseClient.auth.signUp({
+        email: email,
+        password: password
+      });
+
+    if (result.error) {
+
+      console.error("Signup error:", result.error);
 
       authMessage.textContent =
-        "Enter an email and password first.";
+        result.error.message;
 
+      signupButton.disabled = false;
       return;
     }
 
-    if (password.length < 6) {
+    if (!result.data.session) {
 
       authMessage.textContent =
-        "Your password must be at least 6 characters.";
+        "Account created! Check your email and click the confirmation link.";
 
+      signupButton.disabled = false;
       return;
     }
+
+    currentUser = result.data.user;
+
+    authMessage.textContent = "";
+
+    await checkFamilyMembership();
+
+  } catch (error) {
+
+    console.error("Signup exception:", error);
 
     authMessage.textContent =
-      "Creating account...";
-
-    signupButton.disabled = true;
-
-    try {
-
-      const result =
-        await supabaseClient.auth.signUp({
-          email: email,
-          password: password
-        });
-
-      if (result.error) {
-
-        console.error(
-          "Signup error:",
-          result.error
-        );
-
-        authMessage.textContent =
-          result.error.message;
-
-        signupButton.disabled = false;
-
-        return;
-      }
-
-      /*
-       If email confirmation is enabled,
-       Supabase normally gives us no session.
-      */
-
-      if (!result.data.session) {
-
-        authMessage.textContent =
-          "Account created! Check your email and click the confirmation link.";
-
-        signupButton.disabled = false;
-
-        return;
-      }
-
-      currentUser = result.data.user;
-
-      authMessage.textContent = "";
-
-      await checkFamilyMembership();
-
-    } catch (error) {
-
-      console.error(
-        "Unexpected signup error:",
-        error
-      );
-
-      authMessage.textContent =
-        "Account creation failed. Please try again.";
-    }
-
-    signupButton.disabled = false;
+      "Account creation failed. Please try again.";
   }
-);
+
+  signupButton.disabled = false;
+});
 
 
 // -----------------------------
@@ -248,10 +242,7 @@ signupButton.addEventListener(
 async function checkFamilyMembership() {
 
   if (!currentUser) {
-    showLogin(
-      "Please log in again."
-    );
-
+    showScreen(loginScreen);
     return;
   }
 
@@ -264,26 +255,20 @@ async function checkFamilyMembership() {
         .eq("user_id", currentUser.id)
         .maybeSingle();
 
-
     if (result.error) {
 
       console.error(
-        "Membership check error:",
+        "Membership error:",
         result.error
       );
 
-      showLogin(
-        "Could not connect to the family database."
-      );
+      showScreen(loginScreen);
+
+      authMessage.textContent =
+        "Login worked, but the family database could not be reached.";
 
       return;
     }
-
-
-    /*
-      User has an account but is not
-      yet a member of the family.
-    */
 
     if (!result.data) {
 
@@ -297,11 +282,6 @@ async function checkFamilyMembership() {
       return;
     }
 
-
-    /*
-      User is already a family member.
-    */
-
     currentUserElement.textContent =
       result.data.display_name;
 
@@ -313,14 +293,12 @@ async function checkFamilyMembership() {
 
   } catch (error) {
 
-    console.error(
-      "Membership error:",
-      error
-    );
+    console.error(error);
 
-    showLogin(
-      "Something went wrong. Please try again."
-    );
+    showScreen(loginScreen);
+
+    authMessage.textContent =
+      "Something went wrong. Please try again.";
   }
 }
 
@@ -329,93 +307,82 @@ async function checkFamilyMembership() {
 // Join family
 // -----------------------------
 
-joinButton.addEventListener(
-  "click",
-  async function () {
+joinButton.addEventListener("click", async function () {
 
-    const name =
-      displayNameInput.value.trim();
+  if (!supabaseClient || !currentUser) {
+    setupMessage.textContent =
+      "Please log in again.";
+    return;
+  }
 
-    const code =
-      inviteCodeInput.value.trim();
+  const name = displayNameInput.value.trim();
+  const code = inviteCodeInput.value.trim();
 
-    if (!name || !code) {
-
-      setupMessage.textContent =
-        "Please enter your name and the family code.";
-
-      return;
-    }
+  if (!name || !code) {
 
     setupMessage.textContent =
-      "Joining family...";
+      "Please enter your name and the family code.";
 
-    joinButton.disabled = true;
+    return;
+  }
 
-    try {
+  setupMessage.textContent = "Joining family...";
+  joinButton.disabled = true;
 
-      const result =
-        await supabaseClient.rpc(
-          "join_family",
-          {
-            invite_code: code,
-            member_name: name
-          }
-        );
+  try {
 
+    const result =
+      await supabaseClient.rpc(
+        "join_family",
+        {
+          invite_code: code,
+          member_name: name
+        }
+      );
 
-      if (result.error) {
-
-        console.error(
-          "Join family error:",
-          result.error
-        );
-
-        setupMessage.textContent =
-          result.error.message;
-
-        joinButton.disabled = false;
-
-        return;
-      }
-
-
-      if (!result.data) {
-
-        setupMessage.textContent =
-          "That family invitation code is not correct.";
-
-        joinButton.disabled = false;
-
-        return;
-      }
-
-
-      currentUserElement.textContent =
-        name;
-
-      setupMessage.textContent = "";
-
-      showScreen(chatScreen);
-
-      await loadMessages();
-
-      subscribeToMessages();
-
-    } catch (error) {
+    if (result.error) {
 
       console.error(
-        "Unexpected join error:",
-        error
+        "Join error:",
+        result.error
       );
 
       setupMessage.textContent =
-        "Something went wrong. Please try again.";
+        result.error.message;
+
+      joinButton.disabled = false;
+      return;
     }
 
-    joinButton.disabled = false;
+    if (!result.data) {
+
+      setupMessage.textContent =
+        "That family invitation code is not correct.";
+
+      joinButton.disabled = false;
+      return;
+    }
+
+    currentUserElement.textContent = name;
+
+    setupMessage.textContent = "";
+
+    showScreen(chatScreen);
+
+    await loadMessages();
+
+    subscribeToMessages();
+
+  } catch (error) {
+
+    console.error("Join exception:", error);
+
+    setupMessage.textContent =
+      "Something went wrong. Please try again.";
   }
-);
+
+  joinButton.disabled = false;
+});
 
 
 // -----------------------------
@@ -424,9 +391,7 @@ joinButton.addEventListener(
 
 async function loadMessages() {
 
-  if (!currentUser) {
-    return;
-  }
+  if (!currentUser) return;
 
   messagesContainer.innerHTML = "";
 
@@ -448,7 +413,6 @@ async function loadMessages() {
           ascending: true
         });
 
-
     if (result.error) {
 
       console.error(
@@ -458,7 +422,6 @@ async function loadMessages() {
 
       return;
     }
-
 
     if (result.data) {
 
@@ -471,10 +434,7 @@ async function loadMessages() {
 
   } catch (error) {
 
-    console.error(
-      "Unexpected message error:",
-      error
-    );
+    console.error(error);
   }
 }
 
@@ -491,15 +451,12 @@ function addMessageToScreen(message) {
   bubble.className =
     "message-bubble";
 
-
   if (
     currentUser &&
     message.user_id === currentUser.id
   ) {
-
     bubble.classList.add("mine");
   }
-
 
   const name =
     document.createElement("div");
@@ -511,13 +468,11 @@ function addMessageToScreen(message) {
     message.family_members?.display_name ||
     "Family member";
 
-
   const text =
     document.createElement("div");
 
   text.textContent =
     message.message;
-
 
   const time =
     document.createElement("div");
@@ -529,7 +484,6 @@ function addMessageToScreen(message) {
     new Date(
       message.created_at
     ).toLocaleString();
-
 
   bubble.appendChild(name);
   bubble.appendChild(text);
@@ -568,7 +522,6 @@ messageForm.addEventListener(
             message: text
           });
 
-
       if (result.error) {
 
         console.error(
@@ -585,10 +538,7 @@ messageForm.addEventListener(
 
     } catch (error) {
 
-      console.error(
-        "Unexpected send error:",
-        error
-      );
+      console.error(error);
 
       alert(
         "Message could not be sent."
@@ -601,7 +551,7 @@ messageForm.addEventListener(
 
 
 // -----------------------------
-// Realtime messages
+// Realtime
 // -----------------------------
 
 function subscribeToMessages() {
@@ -615,7 +565,6 @@ function subscribeToMessages() {
     realtimeChannel = null;
   }
 
-
   realtimeChannel =
     supabaseClient
       .channel("family-chat")
@@ -628,45 +577,31 @@ function subscribeToMessages() {
         },
         async function (payload) {
 
-          try {
-
-            const result =
-              await supabaseClient
-                .from("messages")
-                .select(`
-                  id,
-                  message,
-                  created_at,
-                  user_id,
-                  family_members (
-                    display_name
-                  )
-                `)
-                .eq(
-                  "id",
-                  payload.new.id
+          const result =
+            await supabaseClient
+              .from("messages")
+              .select(`
+                id,
+                message,
+                created_at,
+                user_id,
+                family_members (
+                  display_name
                 )
-                .single();
+              `)
+              .eq(
+                "id",
+                payload.new.id
+              )
+              .single();
 
+          if (!result.error && result.data) {
 
-            if (
-              !result.error &&
+            addMessageToScreen(
               result.data
-            ) {
-
-              addMessageToScreen(
-                result.data
-              );
-
-              scrollToBottom();
-            }
-
-          } catch (error) {
-
-            console.error(
-              "Realtime message error:",
-              error
             );
+
+            scrollToBottom();
           }
         }
       )
@@ -675,7 +610,7 @@ function subscribeToMessages() {
 
 
 // -----------------------------
-// Scroll to bottom
+// Scroll
 // -----------------------------
 
 function scrollToBottom() {
@@ -717,61 +652,20 @@ logoutButton.addEventListener(
 
 
 // -----------------------------
-// Start application
-// -----------------------------
-
-async function startApp() {
-
-  try {
-
-    const result =
-      await supabaseClient.auth.getSession();
-
-    if (result.error) {
-
-      console.error(
-        "Session error:",
-        result.error
-      );
-
-      showLogin();
-
-      return;
-    }
-
-
-    const session =
-      result.data.session;
-
-
-    if (!session) {
-
-      showScreen(loginScreen);
-
-      return;
-    }
-
-
-    currentUser =
-      session.user;
-
-    await checkFamilyMembership();
-
-  } catch (error) {
-
-    console.error(
-      "Startup error:",
-      error
-    );
-
-    showLogin();
-  }
-}
-
-
-// -----------------------------
 // Start
 // -----------------------------
 
 startApp();
 ```
+
+### Do only these 4 things
+
+1. GitHub → **family-chat** → click **app.js**.
+2. Click the **pencil ✏️** → delete everything → paste the code above.
+3. Click **Commit changes**.
+4. Wait **2 minutes**, then open:
+   **https://ihtshamgoher.github.io/family-chat/**
+
+Then log in with the account you already created.
+
+**Do not change Supabase settings or SQL right now.**

@@ -1,21 +1,16 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Family Chat</title>
 
-  <link
-    rel="stylesheet"
-    href="style.css?v=3"
-  >
+  <link rel="stylesheet" href="style.css?v=4">
+
+  <!-- SUPABASE SDK (Loaded in head to ensure window.supabase exists before app.js runs) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -24,10 +19,7 @@
 
     <!-- LOGIN SCREEN -->
 
-    <section
-      id="login-screen"
-      class="screen"
-    >
+    <section id="login-screen" class="screen">
 
       <div class="card">
 
@@ -41,41 +33,19 @@
           Private chat for our family
         </p>
 
-        <input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="Email address"
-          autocomplete="email"
-        >
+        <input id="email" name="email" type="email" placeholder="Email address" autocomplete="email">
 
-        <input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="Password"
-          autocomplete="current-password"
-        >
+        <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password">
 
-        <button
-          id="login-button"
-          type="button"
-        >
+        <button id="login-button" type="button">
           Log in
         </button>
 
-        <button
-          id="signup-button"
-          type="button"
-          class="secondary"
-        >
+        <button id="signup-button" type="button" class="secondary">
           Create account
         </button>
 
-        <p
-          id="auth-message"
-          class="message"
-        ></p>
+        <p id="auth-message" class="message"></p>
 
       </div>
 
@@ -84,10 +54,7 @@
 
     <!-- FAMILY SETUP -->
 
-    <section
-      id="setup-screen"
-      class="screen hidden"
-    >
+    <section id="setup-screen" class="screen hidden">
 
       <div class="card">
 
@@ -101,33 +68,15 @@
           Tell your family who you are.
         </p>
 
-        <input
-          id="display-name"
-          name="display-name"
-          type="text"
-          placeholder="Your name"
-          autocomplete="name"
-        >
+        <input id="display-name" name="display-name" type="text" placeholder="Your name" autocomplete="name">
 
-        <input
-          id="invite-code"
-          name="invite-code"
-          type="text"
-          placeholder="Family invitation code"
-          autocomplete="off"
-        >
+        <input id="invite-code" name="invite-code" type="text" placeholder="Family invitation code" autocomplete="off">
 
-        <button
-          id="join-button"
-          type="button"
-        >
+        <button id="join-button" type="button">
           Join Family
         </button>
 
-        <p
-          id="setup-message"
-          class="message"
-        ></p>
+        <p id="setup-message" class="message"></p>
 
       </div>
 
@@ -136,10 +85,7 @@
 
     <!-- CHAT SCREEN -->
 
-    <section
-      id="chat-screen"
-      class="hidden chat-screen"
-    >
+    <section id="chat-screen" class="hidden chat-screen">
 
       <header class="chat-header">
 
@@ -149,17 +95,11 @@
             👨‍👩‍👧‍👦 Family Chat
           </strong>
 
-          <span
-            id="current-user"
-          ></span>
+          <span id="current-user"></span>
 
         </div>
 
-        <button
-          id="logout-button"
-          type="button"
-          class="logout"
-        >
+        <button id="logout-button" type="button" class="logout">
           Log out
         </button>
 
@@ -169,19 +109,9 @@
       <main id="messages"></main>
 
 
-      <form
-        id="message-form"
-        class="message-form"
-      >
+      <form id="message-form" class="message-form">
 
-        <input
-          id="message-input"
-          name="message"
-          type="text"
-          placeholder="Write a message..."
-          maxlength="2000"
-          autocomplete="off"
-        >
+        <input id="message-input" name="message" type="text" placeholder="Write a message..." maxlength="2000" autocomplete="off">
 
         <button type="submit">
           ➤
@@ -194,19 +124,12 @@
   </div>
 
 
-  <!-- SUPABASE -->
-
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-  ></script>
-
-
   <!-- OUR APP -->
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 
 
-  <!-- If app.js fails to load, show a useful message -->
+  <!-- DIAGNOSTIC & INITIALIZATION CHECK -->
 
   <script>
 
@@ -214,12 +137,9 @@
 
       setTimeout(function () {
 
-        if (
-          typeof window.supabase === "undefined"
-        ) {
+        if (typeof window.supabase === "undefined") {
 
-          const message =
-            document.getElementById("auth-message");
+          const message = document.getElementById("auth-message");
 
           if (message) {
             message.textContent =
@@ -246,20 +166,3 @@
 </body>
 
 </html>
-```
-
-### Now only do this
-
-1. GitHub → **family-chat** → **index.html**.
-2. Click **✏️ Edit**.
-3. **Delete everything** in the file.
-4. Paste the complete code above.
-5. Click **Commit changes**.
-6. Wait **2–3 minutes**.
-7. Open your Family Chat page.
-8. Press **Ctrl + Shift + R**.
-9. Try logging in.
-
-**Important:** the `undefined` result from `typeof supabaseClient` was not enough to prove that `app.js` wasn't running, because the variable was declared with `let`. So we're correcting that diagnostic rather than chasing the wrong problem.
-
-If login still stays on **“Logging in…”**, don't replace anything else. Tell me exactly what the page says after the click.

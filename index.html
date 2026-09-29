@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- Login -->
+    <section id="login-screen" class="screen">
+      <div class="card">
+        <div class="logo">👨‍👩‍👧‍👦</div>
+        <h1>Family Chat</h1>
+        <p class="subtitle">Private chat for our family</p>
+
+        <input id="email" type="email" placeholder="Email address">
+        <input id="password" type="password" placeholder="Password">
+
+        <button id="login-button">Log in</button>
+        <button id="signup-button" class="secondary">Create account</button>
+
+        <p id="auth-message" class="message"></p>
+      </div>
+    </section>
+
+    <!-- Family setup -->
+    <section id="setup-screen" class="screen hidden">
+      <div class="card">
+        <div class="logo">👋</div>
+        <h1>Welcome!</h1>
+        <p>Tell your family who you are.</p>
+
+        <input id="display-name" type="text" placeholder="Your name">
+        <input id="invite-code" type="text" placeholder="Family invitation code">
+
+        <button id="join-button">Join Family</button>
+
+        <p id="setup-message" class="message"></p>
+      </div>
+    </section>
+
+    <!-- Chat -->
+    <section id="chat-screen" class="hidden chat-screen">
+
+      <header class="chat-header">
+        <div>
+          <strong>👨‍👩‍👧‍👦 Family Chat</strong>
+          <span id="current-user"></span>
+        </div>
+
+        <button id="logout-button" class="logout">Log out</button>
+      </header>
+
+      <main id="messages"></main>
+
+      <form id="message-form" class="message-form">
+        <input
+          id="message-input"
+          type="text"
+          placeholder="Write a message..."
+          maxlength="2000"
+          autocomplete="off"
+        >
+        <button type="submit">➤</button>
+      </form>
+
+    </section>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f4f7;
+  color: #222;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.logo {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  margin: 5px 0;
+}
+
+.subtitle {
+  color: #777;
+  margin-bottom: 25px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 7px 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.secondary {
+  background: #e5e7eb;
+  color: #222;
+}
+
+.message {
+  min-height: 20px;
+  color: #c0392b;
+  margin-top: 15px;
+}
+
+.chat-screen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f2f4f7;
+}
+
+.chat-header {
+  background: white;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+#current-user {
+  display: block;
+  color: #777;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.logout {
+  background: #ef4444;
+  padding: 9px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.message-bubble {
+  max-width: 75%;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.message-bubble.mine {
+  margin-left: auto;
+  background: #dbeafe;
+}
+
+.message-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #999;
+  margin-top: 5px;
+}
+
+.message-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+}
+
+.message-form input {
+  margin: 0;
+  flex: 1;
+}
+
+.message-form button {
+  margin: 0;
+  width: 55px;
+}
+
+@media (max-width: 500px) {
+  .card {
+    padding: 25px;
+  }
+
+  #messages {
+    padding: 12px;
+  }
+
+  .message-bubble {
+    max-width: 85%;
+  }
+}

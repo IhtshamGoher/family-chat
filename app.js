@@ -447,11 +447,10 @@ if (logoutButton) {
 }
 
 // Start app on DOMContentLoaded
-```javascript
 window.addEventListener("load", function () {
   console.log("FAMILY CHAT APP.JS LOADED");
 
   startApp();
 });
-```
+
 

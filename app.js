@@ -447,8 +447,11 @@ if (logoutButton) {
 }
 
 // Start app on DOMContentLoaded
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startApp);
-} else {
+```javascript
+window.addEventListener("load", function () {
+  console.log("FAMILY CHAT APP.JS LOADED");
+
   startApp();
-}
+});
+```
+
